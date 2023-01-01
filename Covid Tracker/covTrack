@@ -1,0 +1,138 @@
+# importing tkinter for GUI interface
+from tkinter import *
+
+# initializing tkinter
+root = Tk()
+
+# Setting the Geometery that decides the size, position
+root.geometry("350x350")
+
+# Setting the Title
+root.title("Get Covid-19 Data by Country")
+
+# Function that retrieves and displays covid data
+
+
+def showdata():
+    # Importing matplotlib, which will be used to visually display data
+    from matplotlib import pyplot as plt
+
+    # Patches are being imported to scale the data.
+    import matplotlib.patches as mpatches
+
+    # Importing Covid Library
+    from covid import Covid
+
+    # Initializing Covid Library
+    covid = Covid()
+
+    # Declaring empty lists to hold various data sets
+    cases = []
+    confirmed = []
+    active = []
+    deaths = []
+    recovered = []
+
+    # Using try and except to run programs without any errors
+    try:
+        # Updating Root
+        root.update()
+
+        # Retrieving Country Names Entered By User
+        countries = data.get()
+
+        # Removing white spaces from the start and end of the following
+        country_names = countries.strip()
+
+        # Replacing white spaces with commas inside the string
+        country_names = country_names.replace("", ",")
+
+        # Splitting String to Store Country Name as a list
+        country_names = country_names.split(",")
+
+        # Using For-loop to get Country Data
+        for x in country_names:
+            """
+            Appending countries data one by one in cases list, 
+            here data will be stored as a dictionary. For one
+            country i.e for each country there will be one
+            dictionary in the list which will contain whole
+            information of that country.
+
+            """
+            cases.append(covid.get_status_by_country_name(x))
+
+            # Updating Root
+            root.update()
+
+        # For loop to get one countries data stored as a dict in list cases
+        for y in cases:
+            # Storing every Country's confirmed cases in the confirmed list
+            confirmed.append(y["confirmed"])
+
+            # Storing every Country's active cases in the active list
+            active.append(y["active"])
+
+            # Storing every Country's death cases in the death list
+            deaths.append(y["deaths"])
+
+            # Storing every Country's recovered cases in the recovered list
+            recovered.append(y["recovered"])
+
+        # Marking the color information on scale using patches
+        confirmed_patch = mpatches.Patch(color='green', Label='confirmed')
+        recovered_patch = mpatches.Patch(color='red', Label='recovered')
+        active_patch = mpatches.Patch(color='blue',  Label='active')
+        deaths_patch = mpatches.Patch(color='black', Label='deaths')
+
+        # Plotting the scale on graph using legend()
+        plt.legend(handles=[confirmed_patch,
+                   recovered_patch, active_patch, deaths_patch])
+
+        """
+        Showing the whole data using graphs,
+        this whole for loop section is related to matplotlib 
+        
+        """
+        for x in range(len(country_names)):
+            plt.bar(country_names[x], confirmed[x], color='green')
+            if recovered[x] > active[x]:
+                plt.bar(country_names[x], recovered[x], color='red')
+                plt.bar(country_names[x], active[x], color='blue')
+            else:
+                plt.bar(country_names[x], active[x], color='blue')
+                plt.bar(country_names[x], recovered[x], color='red')
+            plt.bar(country_names[x], deaths[x], color='black')
+
+        # Setting the Title of the graph
+        plt.title('Current Covid Cases')
+
+        # Giving label to X direction Graph
+        plt.xlabel('Country Name')
+
+        # Giving label to y direction Graph
+        plt.ylabel('Cases(in millions)')
+
+        # Showing the full graph
+        plt.show()
+
+    except Exception as e:
+        """
+        Asking User to enter correct information,
+        while entering the country names on GUI
+        please diffrentiate country names with
+        spaces or comma but not with both 
+        otherwise you will come to this section
+
+        """
+        data.set("Enter correct details again")
+
+
+Label(root, text="Enter all countries names\nfor whom you want to get\ncovid-19 data",
+      font="Consolas 15 bold").pack()
+Label(root, text="Enter Country name:").pack()
+data = StringVar()
+data.set("Seperate country names using comma or space(not both)")
+entry = Entry(root, textvariable=data, width=50).pack()
+Button(root, text="Get Data", command=showdata).pack()
+root.mainloop()
